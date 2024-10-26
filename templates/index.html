@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Image for Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            margin-bottom: 20px;
+            padding: 18px;
+            padding-left:50px;
+            padding-right:0px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            width: 80%;
+            
+        }
+
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Distracted Driver Detection App</h1>
+
+        <img src="https://t3.ftcdn.net/jpg/04/20/56/08/360_F_420560848_NdTCqJKtTHwpne4VvGiuLVIwNSUWoMQ2.jpg" alt="Welcome Image">
+        <form action="/predict" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept="image/*" required>
+            <input type="submit" value="Upload Image">
+        </form>
+    </div>
+</body>
+</html>
