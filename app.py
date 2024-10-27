@@ -10,10 +10,12 @@ import io
 app = Flask(__name__)
 
 # Load the trained model (ResNet18 in this case)
+# Load the trained model (ResNet18 in this case)
 model = models.resnet18(weights=ResNet18_Weights.DEFAULT)  # Use new weight loading
 model.fc = torch.nn.Linear(model.fc.in_features, 10)  # Adjust for 10 classes
-model.load_state_dict(torch.load('models\ResNet18.pt'))  # Load model weights
+model.load_state_dict(torch.load('models/ResNet18.pt', map_location=torch.device('cpu')))  # Load model weights to CPU
 model.eval()  # Set model to evaluation mode
+
 
 
 # Define image transformations
@@ -23,6 +25,7 @@ preprocess = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
+
 
 # Define the state names corresponding to model outputs
 state = [
@@ -57,23 +60,40 @@ def predict():
     # Check if the file is valid
     if file.filename == '':
         error_message = 'No file selected. Please select an image to upload.'
-        return render_template('error.html', error_message=error_message), 
+        return render_template('error.html', error_message=error_message), 400
 
     try:
         # Read the image file and preprocess it
         img = Image.open(io.BytesIO(file.read()))
-        img = preprocess(img).unsqueeze(0)  # Add batch dimensiono
-
+        img_tensor = preprocess(img).unsqueeze(0) 
+        
+        def apply_temperature_scaling(logits, temperature=1.0):
+            return torch.nn.functional.softmax(logits / temperature, dim=1)
+        
+        
         # Make the prediction
         with torch.no_grad():
-            output = model(img)
-            _, predicted_class = torch.max(output, 1)
+            temperature = 2.0  
+            output = model(img_tensor)
+            probabilities = torch.nn.functional.softmax(output, dim=1)
+            predicted_class = torch.max(probabilities, 1)[1]
+            confidence = probabilities[0][predicted_class.item()].item() 
 
         # Get the state name
         state_name = state[predicted_class.item()]
+        threshold = 0.7  # Set the threshold value you want (e.g., 70% confidence)
+        if confidence < threshold:
+            state_name = "Prediction uncertain"
+        else:
+            # Get the state name
+            state_name = state[predicted_class.item()]
 
-        # Render the result page with the prediction
-        return render_template('result.html', prediction=predicted_class.item(), state_name=state_name)
+        # Save the image to display on the result page
+        img.save(f'static/uploads/{file.filename}')  # Save the uploaded image
+
+        # Render the result page with the prediction and confidence level
+        return render_template('result.html', state_name=state_name, confidence=confidence, image_filename=file.filename)
+
 
     except Exception as e:
         error_message = 'An error occurred during image processing. Please try again.'

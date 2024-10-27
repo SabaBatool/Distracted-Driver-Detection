@@ -31,6 +31,14 @@
             font-size: 18px;
             margin: 20px 0;
         }
+        .predicted-image {
+            margin: 20px 0;
+        }
+        .predicted-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
         a {
             display: inline-block;
             margin-top: 20px;
@@ -56,8 +64,15 @@
         <h1>Prediction Result</h1>
         <div class="result">
             <strong>Predicted State:</strong> {{ state_name }}<br>
-            <strong>Class Index:</strong> {{ prediction }}
+            <strong>Confidence Level:</strong> {{ confidence * 100 | round(2) }}%
         </div>
+          
+        <!-- Section to display the predicted image -->
+        <div class="predicted-image">
+            <h2>predicted-image:</h2>
+            <img src="{{ url_for('static', filename='uploads/' + image_filename) }}" alt="Uploaded Image">
+        </div>
+
         <a href="/">Upload Another Image</a>
         <div class="footer">
             <p>Powered by ResNet18 Model API</p>
